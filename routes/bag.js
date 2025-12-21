@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 // GET bag by ID
 router.get('/:login_id', async (req, res) => {
   try {
-    const bag = await Bag.find({login_id:req.params.login_id});
+    const bag = await Bag.findOne({login_id:req.params.login_id});
     if (!bag) return res.status(404).send('Order not found');
     res.json(bag);
   } catch (err) {

@@ -113,5 +113,19 @@ router.patch('/byid/:id', async (req, res) => {
     res.status(500).send('Error: ' + err);
   }
 });
-
+router.post('/login',async(req,res)=>{
+  try{
+    const {email,password}=req.body
+    const user = await User.findOne({email})
+    if(!user){
+      return res.status(400).json({success:false,message:"Invalid email or password"})
+    }
+    if (password !== user.password) {
+      return res.status(400).json({ success: false, message: "Invalid email or password" });
+    }
+    res.json({success:true,message:"Login successful",user})
+  }catch(err){
+    return res.status(500).json({success:false,message:"Server Error"})
+  }
+})
 module.exports = router
