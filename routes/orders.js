@@ -13,9 +13,9 @@ router.get('/', async (req, res) => {
 });
 
 // GET order by ID
-router.get('/:id', async (req, res) => {
+router.get('/:login_id', async (req, res) => {
   try {
-    const order = await Orders.findById(req.params.id).populate('product_ids');
+    const order = await Orders.findOne({login_id:req.params.login_id}).populate('product_ids');
     if (!order) return res.status(404).send('Order not found');
     res.json(order);
   } catch (err) {
