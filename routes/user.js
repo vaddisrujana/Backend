@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const User = require('../models/user')
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken')
 //Get all Users
 router.get('/',async(req,res)=>{
   try{
@@ -119,13 +120,16 @@ router.post('/login',async(req,res)=>{
     const {email,password}=req.body
     const user = await User.findOne({email})
     const decryptPassword = await bcrypt.compare(password,user.password)
-    if(!user){
-      return res.status(400).json({success:false,message:"Invalid email or password"})
-    }
-    if (!decryptPassword) {
-      return res.status(400).json({ success: false, message: "Invalid email or password" });
-    }
-    res.json({success:true,message:"Login successful",user})
+    // if(!user){
+    //   return res.status(400).json({success:false,message:"Invalid email or password"})
+    // }
+    // if (!decryptPassword) {
+    //   return res.status(400).json({ success: false, message: "Invalid email or password" });
+    // }
+    let userId=user._id;
+    const payload={username:userId};
+    const jwtToken = jwt.sign(payload,'srujana');
+    res.json({success:true,message:"Login successful",jwtToken,userId})
   }catch(err){
     return res.status(500).json({success:false,message:"Server Error"})
   }

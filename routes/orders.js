@@ -1,9 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const Orders = require('../models/orders');
+const jwt = require('jsonwebtoken')
 
+const logger=(req,res,next)=>{
+  const authHeader = req.headers['authorization'];
+  let jwtToken;
+  if(authHeader!==undefined){
+    jwtToken=authHeader.split(' ')[1];
+  }
+  if(jwtToken===undefined){
+    res.status(401);
+    res.send("Invalid JWT Token");
+  }else{
+    jwt.verify(jwtToken,"srujana",async(error,payload)=>{
+      if(error){
+        res.status(401);
+        res.send("Invalid JWT Token");
+      }else{
+        req.username=payload.username;
+        next();
+      }
+    })
+  }
+}
 // GET all orders
-router.get('/', async (req, res) => {
+router.get('/',logger, async (req, res) => {
   try {
     const orders = await Orders.find().populate('product_ids'); // populate product details
     res.json(orders);
@@ -13,10 +35,9 @@ router.get('/', async (req, res) => {
 });
 
 // GET order by ID
-router.get('/:login_id', async (req, res) => {
+router.get('/:login_id',logger, async (req, res) => {
   try {
     const order = await Orders.findOne({login_id:req.params.login_id}).populate('product_ids');
-    if (!order) return res.status(404).send('Order not found');
     res.json(order);
   } catch (err) {
     res.status(500).send('Error: ' + err.message);

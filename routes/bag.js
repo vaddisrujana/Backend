@@ -1,12 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const Bag = require('../models/bag');
- 
+const jwt = require('jsonwebtoken')
+
+const logger=(req,res,next)=>{
+  const authHeader = req.headers['authorization'];
+  let jwtToken;
+  if(authHeader!==undefined){
+    jwtToken=authHeader.split(' ')[1];
+  }
+  if(jwtToken===undefined){
+    res.status(401);
+    res.send("Invalid JWT Token");
+  }else{
+    jwt.verify(jwtToken,"srujana",async(error,payload)=>{
+      if(error){
+        res.status(401);
+        res.send("Invalid JWT Token");
+      }else{
+        req.username=payload.username;
+        next();
+      }
+    })
+  }
+}
 // GET all Bag
-router.get('/', async (req, res) => {
+router.get('/',logger, async (req, res) => {
   try {
-    const bag = await Bag.find(); // populate product details
-    res.json(bag);
+    const bag = await Bag.find();
+    let {username} = req;
+    res.json(username,bag);
   } catch (err) {
     res.status(500).send('Error: ' + err.message);
   }
